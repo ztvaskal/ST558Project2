@@ -6,8 +6,14 @@ Zack Vaskalis
   - [Introduction](#introduction)
   - [Project Objectives](#project-objectives)
   - [Data](#data)
-      - [Information on Attributes for
-        Analysis:](#information-on-attributes-for-analysis)
+      - [Information on Variables for
+        Analysis:](#information-on-variables-for-analysis)
+      - [Purpose of the Analysis](#purpose-of-the-analysis)
+      - [Methods for Analysis](#methods-for-analysis)
+          - [Multiple-Linear Regression (MLR)
+            Model](#multiple-linear-regression-mlr-model)
+          - [Random Forest (RF) Model](#random-forest-rf-model)
+  - [Goal of Project](#goal-of-project)
   - [Reports](#reports)
 
 ## Introduction
@@ -34,7 +40,7 @@ are predictive attributes, 2 non-predictive variables(the source url and
 the time between article publication and dataset acquisition), and
 finally the goal field for prediction: the number of shares.
 
-### Information on Attributes for Analysis:
+### Information on Variables for Analysis:
 
 Out of the 61 Attributes available in this dataset for analysis, in
 order not to overfit the model with too many dependent variables (which
@@ -87,8 +93,67 @@ would have an impact on predicting the shares so I chose
 `global_subjectivity` and `global_sentiment_polarity`. Then finally, to
 round out the dataset of predictors I chose the title subjectivity and
 absolutely subjectivity level, since often a title will have the largest
-impact - catchy or provoking titles are clickbait for a reason\! \#\#
-Goal of Project
+impact - catchy or provoking titles are clickbait for a reason\!
+
+### Purpose of the Analysis
+
+The ultimate purpose of this analysis is to create 2 models (one linear
+and one non-linear) for predicting the shares variable, which is in some
+sense is a measure of popularity. In addition to this purpose, another
+primary purpose is to explore using parameter functionality within R
+Markdown to automatically generate analysis reports for each day of the
+week, using each `weekday_is_` variable as a parameter.
+
+### Methods for Analysis
+
+As mentioned above, there will be 2 models created within this project,
+one linear and one non-linear.
+
+#### Multiple-Linear Regression (MLR) Model
+
+The linear model we will use for our 14 predictor variables will be a
+multiple linear regression model, without interactions or quadratic
+terms. This is in part why the datasets being used for training and
+testing only contain the variables we need for analysis - which will
+simplify the code as we will see below. This model also allows us to use
+the root mean squared error (RMSE), which is an important topic in
+statistics in general. Karen Grace-Martin has a nice description of RMSE
+in a succinct blog post titled: [Assessing the Fit of Regression
+Models](https://www.theanalysisfactor.com/assessing-the-fit-of-regression-models/#:~:text=The%20RMSE%20is%20the%20square,an%20absolute%20measure%20of%20fit).
+The RMSE is the square root of the variance of the residuals. It
+indicates the absolute fit of the model to the data–how close the
+observed data points are to the model’s predicted values. This is
+exactly what we are trying to do here. We will look at the RMSE of both
+the training data and testing data. What is nice about the RMSE, is that
+we will use this as the measure of the non-linear model as well, and in
+some sense be able to compare the two models that way. RMSE is also an
+absolute measure of fit, since it is the square root of a variance, it
+can also be interpreted as the standard deviation of the unexplained
+variance, and has the useful property of being in the same units as the
+response variable. Lower values of RMSE indicate better fit. RMSE is a
+good measure of how accurately the model predicts the response, and it
+is the most important criterion for fit if the main purpose of the model
+is prediction, which again, is exactly what we are trying to do here.
+
+#### Random Forest (RF) Model
+
+For the non-linear model, we will use the random forest model. Tony Yiu
+has a great blog post entitled [Understanding Random Forest: How the
+Algorithm Works and Why it Is So
+Effective](https://towardsdatascience.com/understanding-random-forest-58381e0602d2).
+One benefit in this situation to use the Random Forest Model is that we
+can again in some sense compare to the MLR model via RMSE. The main
+concept and benefit behind the RF Model in general is that there is
+wisdom in the group, i.e. a large number of relatively uncorrelated
+models (trees) operating as a committee will outperform any of the
+individual constituent models. This is because the trees protect each
+other from their individual errors, as long as they are all not in
+error. A few trees may be wrong, but many many more will be right, so
+the group leads the model in the correct direction. Thus, we will use
+these two models for our analysis and compare the results for each day
+of the week.
+
+## Goal of Project
 
 The goal of this project is to create 2 models (one linear and one
 non-linear) for predicting the shares variable. In addition to this
@@ -98,14 +163,10 @@ the week, using each `weekday_is_` variable as a parameter.
 
 ## Reports
 
-[General Weekday Template - pre-automation](Weekday.md)
-
-``` r
-#[The Analysis for Monday is available here](MondayAnalysis.md)
-#[The Analysis for Tuesday is available here](TuesdayAnalysis.md)
-#[The Analysis for Wednesday is available here](WednesdayAnalysis.md)
-#[The Analysis for Thursday is available here](ThursdayAnalysis.md)
-#[The Analysis for Friday is available here](FridayAnalysis.md)
-#[The Analysis for Saturday is available here](SaturdayAnalysis.md)
-#[The Analysis for Sunday is available here](SundayAnalysis.md)
-```
+[The Analysis for Monday is available here](MondayAnalysis.md)  
+[The Analysis for Tuesday is available here](TuesdayAnalysis.md)  
+[The Analysis for Wednesday is available here](WednesdayAnalysis.md)  
+[The Analysis for Thursday is available here](ThursdayAnalysis.md)  
+[The Analysis for Friday is available here](FridayAnalysis.md)  
+[The Analysis for Saturday is available here](SaturdayAnalysis.md)  
+[The Analysis for Sunday is available here](SundayAnalysis.md)

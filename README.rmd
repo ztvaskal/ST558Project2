@@ -76,19 +76,16 @@ For the non-linear model, we will use the random forest model.  Tony Yiu has a g
 
 The goal of this project is to create 2 models (one linear and one non-linear) for predicting the shares variable.  In addition to this goal, another primary goal is to use parameter functionality within R Markdown to automatically generate an analysis report for each day of the week, using each `weekday_is_` variable as a parameter.
 
-## Reports
+## Reports    
+    
+[The Analysis for Monday is available here](MondayAnalysis.md)    
+[The Analysis for Tuesday is available here](TuesdayAnalysis.md)    
+[The Analysis for Wednesday is available here](WednesdayAnalysis.md)    
+[The Analysis for Thursday is available here](ThursdayAnalysis.md)    
+[The Analysis for Friday is available here](FridayAnalysis.md)    
+[The Analysis for Saturday is available here](SaturdayAnalysis.md)    
+[The Analysis for Sunday is available here](SundayAnalysis.md)    
 
-[General Weekday Template - pre-automation](Weekday.md)
-
-```{r weekdayDocuments, echo=TRUE, results=FALSE}
-#[The Analysis for Monday is available here](MondayAnalysis.md)
-#[The Analysis for Tuesday is available here](TuesdayAnalysis.md)
-#[The Analysis for Wednesday is available here](WednesdayAnalysis.md)
-#[The Analysis for Thursday is available here](ThursdayAnalysis.md)
-#[The Analysis for Friday is available here](FridayAnalysis.md)
-#[The Analysis for Saturday is available here](SaturdayAnalysis.md)
-#[The Analysis for Sunday is available here](SundayAnalysis.md)
-```
 
 
 
