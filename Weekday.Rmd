@@ -2,14 +2,57 @@
 title: "Weekday"
 author: "Zack Vaskalis"
 date: "7/2/2020"
-output: html_document
+output: 
+  rmarkdown::github_document:
+    toc: TRUE
+    toc_depth: 3
+    html_preview: TRUE
+urlcolor: blue
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-```{r loadlibraries, echo=FALSE, results=FALSE, warning=FALSE, comment=FALSE, message=FALSE}
+## Introduction
+
+### Attribute Information:
+
+Number of Attributes in Dataset for Analysis: 28 (27 predictive attributes, 1 outcome attribute)
+
+Attribute Information:    
+1.  n_tokens_title: Number of words in the title    
+2.  n_tokens_content: Number of words in the content    
+3.  n_unique_tokens: Rate of unique words in the content    
+4.  n_non_stop_unique_tokens: Rate of unique non-stop words in the content    
+5.  weekday_is_monday: Was the article published on a Monday?    
+6.  weekday_is_tuesday: Was the article published on a Tuesday?    
+7.  weekday_is_wednesday: Was the article published on a Wednesday?    
+8.  weekday_is_thursday: Was the article published on a Thursday?    
+9.  weekday_is_friday: Was the article published on a Friday?    
+10.  weekday_is_saturday: Was the article published on a Saturday?    
+11.  weekday_is_sunday: Was the article published on a Sunday?    
+12.  global_subjectivity: Text subjectivity    
+13.  global_sentiment_polarity: Text sentiment polarity    
+14.  global_rate_positive_words: Rate of positive words in the content    
+15.  global_rate_negative_words: Rate of negative words in the content    
+16.  rate_positive_words: Rate of positive words among non-neutral tokens    
+17.  rate_negative_words: Rate of negative words among non-neutral tokens    
+18.  avg_positive_polarity: Avg. polarity of positive words    
+19.  min_positive_polarity: Min. polarity of positive words    
+20.  max_positive_polarity: Max. polarity of positive words    
+21.  avg_negative_polarity: Avg. polarity of negative words    
+22.  min_negative_polarity: Min. polarity of negative words    
+23.  max_negative_polarity: Max. polarity of negative words    
+24.  title_subjectivity: Title subjectivity    
+25.  title_sentiment_polarity: Title polarity    
+26.  abs_title_subjectivity: Absolute subjectivity level    
+27.  abs_title_sentiment_polarity: Absolute polarity level    
+28.  shares: Number of shares (target)    
+
+
+
+```{r loadlibraries, echo=TRUE, results=FALSE, warning=FALSE, comment=FALSE, message=FALSE}
 #load necessary libraries
 library(rmarkdown)
 library(tidyverse)
@@ -21,13 +64,12 @@ library(haven)
 library(rgl)
 library(knitr)
 library(tree)
+library(psych)
+library(DT)
+library(summarytools)
 ```
 
-## R Markdown
-
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
-
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+## Data
 
 ```{r readInOnlineNewsPopularityDataset, echo=TRUE, message=FALSE, warning=FALSE}
 # Read-in entire dataset
@@ -35,14 +77,77 @@ path <- "C:/Users/Zachary Vaskalis/Dropbox/ST558/ST558Project2/ST558Project2/Onl
 weekdayDataRAW <- read_csv(path)
 
 # Select only variables I am choosing to use for the analysis.
+weekdayData1 <- select(weekdayDataRAW,n_tokens_title, n_tokens_content, n_unique_tokens,
+                       n_non_stop_unique_tokens, weekday_is_monday, weekday_is_tuesday,
+                       weekday_is_wednesday, weekday_is_thursday, weekday_is_friday,
+                       weekday_is_saturday, weekday_is_sunday, global_subjectivity,
+                       global_sentiment_polarity, global_rate_positive_words,
+                       global_rate_negative_words, rate_positive_words, rate_negative_words,
+                       avg_positive_polarity, min_positive_polarity, max_positive_polarity,
+                       avg_negative_polarity, min_negative_polarity, max_negative_polarity,
+                       title_subjectivity, title_sentiment_polarity, abs_title_subjectivity,
+                       abs_title_sentiment_polarity, shares)
+
+# Select only the specific day of the week I am interested in.
+weekdayData2 <- filter(weekdayData1, weekday_is_monday == 1)
+
+# Now we know we only have the day of the week filtered by above.
+# So, we can remove all of the weekday_is_* variables now as they are no longer needed.
+# Additionally, these variables are constant.  The selected weekday would contain all 1s,
+# while the other weekdays are all 0s.  Thus, they are no longer useful for analysis.
+weekdayData3 <- select(weekdayData2, -(weekday_is_monday:weekday_is_sunday))
+
 ```
 
-## Including Plots
+```{r createTrainTestSets, echo=TRUE, message=FALSE, warning=FALSE}
+# Get random number from the computer clock using Sys.time()
+initial_seed <- Sys.time()
+initial_seed <- as.integer(initial_seed)
+print (initial_seed)
+seed <- initial_seed %% 100000
+print(seed)
 
-You can also embed plots, for example:
+# For reproducability, set seed using outcome of above process:
+set.seed(30135)
 
-```{r pressure, echo=FALSE}
-plot(pressure)
+# Get random sample of row numbers from large dataset to split data into train and test:
+# 70% of data for training
+train <- sample(1:nrow(weekdayData3), size = nrow(weekdayData3)*.70) 
+# 30% of data for testing
+test <- dplyr::setdiff(1:nrow(weekdayData3), train)
+
+# Subset the Data into training and testing sets, using rows from train and test:
+trainingData <- weekdayData3[train,]
+testingData <- weekdayData3[test,]
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+
+## Summarizations
+
+The summaries below are related to the training dataset.  The table that appears below is a summary of all of the variables from the training dataset using the `describeBy()` function from the `psych` package.
+
+```{r summaryStatistics, echo=TRUE, message=FALSE, warning=FALSE}
+# Summary statistics for all variables in the training dataset using the
+# describeBy() function from the psych package
+summaryData <- psych::describeBy(trainingData, trainingData$type)
+#x <- kable(summaryData)
+#kableExtra::column_spec(x, c(1,2,3), width = "10em", bold = TRUE, italic = TRUE, width_min = TRUE)
+
+
+y <- tibble(row.names(summaryData), summaryData)  #summaryData$n, summaryData$mean, summaryData$sd)
+colnames(y)[1] <- "variable"
+datatable(select(y,1,3,4,5,6,8,9,10))
+#mydata <- summarytools::descr(trainingData)
+#datatable(mydata)
+
+```
+
+## Modeling
+
+
+
+
+
+
+
