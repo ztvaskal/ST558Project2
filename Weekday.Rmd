@@ -1,5 +1,5 @@
 ---
-title: "Weekday"
+title: "Weekday Analysis"
 author: "Zack Vaskalis"
 date: "07/03/2020"
 output: 
@@ -12,6 +12,12 @@ urlcolor: blue
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Weekday Analysis for:
+
+```{r paramsValue, echo=TRUE}
+substring(params$dayVar, first = 12)
 ```
 
 ## Introduction
@@ -87,6 +93,7 @@ library(psych)
 library(DT)
 library(summarytools)
 library(packHV)
+library(pacman)
 ```
 
 Next, we will read in the entire dataset.  Then we will use the `select()` function from the `dplyr` package to select only the variables mentioned above for the analysis.  After that we will start the process for automation.  We will filter by each day of the week for the `weekday_is_` variable, thus ultimately creating 7 reports. Finally, once the day of the week is selected, all of the `weekday_is_` variables will be removed from the dataset, as they are no longer useful for the analysis.
@@ -105,10 +112,16 @@ weekdayData1 <- select(weekdayDataRAW, n_tokens_content, num_hrefs,
                        abs_title_subjectivity, shares,
                        weekday_is_monday, weekday_is_tuesday,
                        weekday_is_wednesday, weekday_is_thursday, weekday_is_friday,
-                       weekday_is_saturday, weekday_is_sunday,)
+                       weekday_is_saturday, weekday_is_sunday)
+
+
 
 # Select only the specific day of the week I am interested in.
-weekdayData2 <- filter(weekdayData1, weekday_is_monday == 1)
+# weekdayData2 <- filter(weekdayData1, weekday_is_monday == 1)
+if (colnames(weekdayData1[16]) == params$dayVar){
+  weekdayData2 <- filter(weekdayData1, weekday_is_monday == 1)
+}
+
 
 # Now we know we only have the day of the week filtered by above.
 # So, we can remove all of the weekday_is_* variables now as they are no longer needed.
