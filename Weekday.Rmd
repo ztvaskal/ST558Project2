@@ -16,9 +16,9 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Introduction
 
-This project uses the Online News Popularity Data Set which can be found at the University of California Irvine [UCI Machine Learning Repository, Center for Machine Learning and Intelligent Systems](https://archive.ics.uci.edu/ml/datasets/Online+News+Popularity#). The dataset being used here was compiled by several researchers in Portugal, who collected articles from [Mashable](www.mashable.com) and compiled associated statistics for a period of two years, with the goal of being able to predict the number of shares in social networks (a measure of popularity). The dataset has over 39,000 records of information spanning the two year time period from January 07, 2013 to December 27th, 2014.  The dataset also contains 61 variables, of which 58 are predictive attributes, 2 non-predictive variables(the source url and the time between article publication and dataset acquisition), and finally the goal field for prediction: the number of shares.
+This project uses, for analysis, the Online News Popularity Data Set which can be found at the University of California Irvine [UCI Machine Learning Repository, Center for Machine Learning and Intelligent Systems](https://archive.ics.uci.edu/ml/datasets/Online+News+Popularity#). The dataset being used here was compiled by several researchers in Portugal, who collected articles from [Mashable](www.mashable.com) and compiled associated statistics for a period of two years, with the goal of being able to predict the number of shares in social networks (a measure of popularity). The dataset has over 39,000 records of information spanning the two year time period from January 07, 2013 to December 27th, 2014.  The dataset also contains 61 variables, of which 58 are predictive attributes, 2 non-predictive variables(the source url and the time between article publication and dataset acquisition), and finally the goal field for prediction: the number of shares.
 
-### Attribute Information:
+### Information on Attributes for Analysis:
 
 Out of the 61 Attributes available in this dataset for analysis, in order not to overfit the model with too many dependent variables (which could yield not enough generalization of the dataset to make predictions, especially valid ones), I have chosen to use the following 7 variables, 6 which are predictive, and 1, the shares variable, which is outcome variable.  The weekday variables are also included, but only for subsetting the data by the day of the week.  Once we have the "Monday" dataset, for instance, all of these `weekday_is_*` variables will be removed from the dataset.  The variables selected are below, and the reasoning behind their selection follows.
 
@@ -65,20 +65,15 @@ library(summarytools)
 
 ```{r readInOnlineNewsPopularityDataset, echo=TRUE, message=FALSE, warning=FALSE}
 # Read-in entire dataset
-path <- "C:/Users/Zachary Vaskalis/Dropbox/ST558/ST558Project2/ST558Project2/OnlineNewsPopularity.csv"
+path <- "C:/Users/Zachary Vaskalis/Dropbox/ST558/OnlineNewsPopularity.csv"
 weekdayDataRAW <- read_csv(path)
 
 # Select only variables I am choosing to use for the analysis.
 weekdayData1 <- select(weekdayDataRAW, n_tokens_content, n_unique_tokens,
-                       n_non_stop_unique_tokens, weekday_is_monday, weekday_is_tuesday,
+                       average_token_length, weekday_is_monday, weekday_is_tuesday,
                        weekday_is_wednesday, weekday_is_thursday, weekday_is_friday,
                        weekday_is_saturday, weekday_is_sunday, global_subjectivity,
-                       global_sentiment_polarity, global_rate_positive_words,
-                       global_rate_negative_words, rate_positive_words, rate_negative_words,
-                       avg_positive_polarity, min_positive_polarity, max_positive_polarity,
-                       avg_negative_polarity, min_negative_polarity, max_negative_polarity,
-                       title_subjectivity, title_sentiment_polarity, abs_title_subjectivity,
-                       abs_title_sentiment_polarity, shares)
+                       rate_positive_words, avg_positive_polarity, shares)
 
 # Select only the specific day of the week I am interested in.
 weekdayData2 <- filter(weekdayData1, weekday_is_monday == 1)

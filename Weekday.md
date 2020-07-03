@@ -4,16 +4,17 @@ Zack Vaskalis
 07/03/2020
 
   - [Introduction](#introduction)
-      - [Attribute Information:](#attribute-information)
+      - [Information on Attributes for
+        Analysis:](#information-on-attributes-for-analysis)
   - [Data](#data)
   - [Summarizations](#summarizations)
   - [Modeling](#modeling)
 
 ## Introduction
 
-This project uses the Online News Popularity Data Set which can be found
-at the University of California Irvine [UCI Machine Learning Repository,
-Center for Machine Learning and Intelligent
+This project uses, for analysis, the Online News Popularity Data Set
+which can be found at the University of California Irvine [UCI Machine
+Learning Repository, Center for Machine Learning and Intelligent
 Systems](https://archive.ics.uci.edu/ml/datasets/Online+News+Popularity#).
 The dataset being used here was compiled by several researchers in
 Portugal, who collected articles from [Mashable](www.mashable.com) and
@@ -26,7 +27,7 @@ are predictive attributes, 2 non-predictive variables(the source url and
 the time between article publication and dataset acquisition), and
 finally the goal field for prediction: the number of shares.
 
-### Attribute Information:
+### Information on Attributes for Analysis:
 
 Out of the 61 Attributes available in this dataset for analysis, in
 order not to overfit the model with too many dependent variables (which
@@ -83,20 +84,15 @@ library(summarytools)
 
 ``` r
 # Read-in entire dataset
-path <- "C:/Users/Zachary Vaskalis/Dropbox/ST558/ST558Project2/ST558Project2/OnlineNewsPopularity.csv"
+path <- "C:/Users/Zachary Vaskalis/Dropbox/ST558/OnlineNewsPopularity.csv"
 weekdayDataRAW <- read_csv(path)
 
 # Select only variables I am choosing to use for the analysis.
 weekdayData1 <- select(weekdayDataRAW, n_tokens_content, n_unique_tokens,
-                       n_non_stop_unique_tokens, weekday_is_monday, weekday_is_tuesday,
+                       average_token_length, weekday_is_monday, weekday_is_tuesday,
                        weekday_is_wednesday, weekday_is_thursday, weekday_is_friday,
                        weekday_is_saturday, weekday_is_sunday, global_subjectivity,
-                       global_sentiment_polarity, global_rate_positive_words,
-                       global_rate_negative_words, rate_positive_words, rate_negative_words,
-                       avg_positive_polarity, min_positive_polarity, max_positive_polarity,
-                       avg_negative_polarity, min_negative_polarity, max_negative_polarity,
-                       title_subjectivity, title_sentiment_polarity, abs_title_subjectivity,
-                       abs_title_sentiment_polarity, shares)
+                       rate_positive_words, avg_positive_polarity, shares)
 
 # Select only the specific day of the week I am interested in.
 weekdayData2 <- filter(weekdayData1, weekday_is_monday == 1)
@@ -115,7 +111,7 @@ initial_seed <- as.integer(initial_seed)
 print (initial_seed)
 ```
 
-    ## [1] 1593783032
+    ## [1] 1593785388
 
 ``` r
 seed <- initial_seed %% 100000
@@ -187,36 +183,23 @@ summary(mlr1)
     ## 
     ## Residuals:
     ##    Min     1Q Median     3Q    Max 
-    ## -13195  -3124  -1825   -248 684662 
+    ##  -8224  -3031  -2053   -556 686348 
     ## 
     ## Coefficients:
-    ##                                Estimate Std. Error t value Pr(>|t|)   
-    ## (Intercept)                   3.993e+03  1.623e+03   2.460  0.01393 * 
-    ## n_tokens_content             -5.410e-02  8.948e-01  -0.060  0.95179   
-    ## n_unique_tokens               6.599e+03  6.949e+03   0.950  0.34237   
-    ## n_non_stop_unique_tokens     -2.536e+03  5.636e+03  -0.450  0.65273   
-    ## global_subjectivity           7.690e+03  3.487e+03   2.205  0.02749 * 
-    ## global_sentiment_polarity    -8.398e+03  7.020e+03  -1.196  0.23165   
-    ## global_rate_positive_words   -1.024e+03  3.092e+04  -0.033  0.97357   
-    ## global_rate_negative_words    3.175e+03  5.907e+04   0.054  0.95714   
-    ## rate_positive_words          -7.643e+03  3.554e+03  -2.150  0.03158 * 
-    ## rate_negative_words          -1.252e+04  4.618e+03  -2.711  0.00674 **
-    ## avg_positive_polarity         1.044e+04  5.661e+03   1.844  0.06526 . 
-    ## min_positive_polarity        -8.767e+03  4.951e+03  -1.771  0.07665 . 
-    ## max_positive_polarity        -1.906e+03  1.832e+03  -1.040  0.29839   
-    ## avg_negative_polarity        -1.726e+03  5.309e+03  -0.325  0.74515   
-    ## min_negative_polarity        -2.711e+03  1.980e+03  -1.369  0.17101   
-    ## max_negative_polarity        -4.766e+03  4.445e+03  -1.072  0.28370   
-    ## title_subjectivity           -7.426e+02  1.169e+03  -0.635  0.52546   
-    ## title_sentiment_polarity      4.917e+02  1.084e+03   0.454  0.65011   
-    ## abs_title_subjectivity        1.753e+03  1.551e+03   1.130  0.25864   
-    ## abs_title_sentiment_polarity  1.633e+03  1.689e+03   0.967  0.33374   
+    ##                         Estimate Std. Error t value Pr(>|t|)    
+    ## (Intercept)            4778.3406  1406.5477   3.397 0.000686 ***
+    ## n_tokens_content          0.3399     0.7685   0.442 0.658245    
+    ## n_unique_tokens        3762.6855  3483.3409   1.080 0.280112    
+    ## average_token_length  -1612.1299   545.6755  -2.954 0.003149 ** 
+    ## global_subjectivity   10182.0603  2983.9765   3.412 0.000650 ***
+    ## rate_positive_words   -1473.9988  1597.8123  -0.923 0.356310    
+    ## avg_positive_polarity  1892.9030  3094.9280   0.612 0.540823    
     ## ---
     ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
     ## 
-    ## Residual standard error: 16830 on 4642 degrees of freedom
-    ## Multiple R-squared:  0.009772,   Adjusted R-squared:  0.005719 
-    ## F-statistic: 2.411 on 19 and 4642 DF,  p-value: 0.000552
+    ## Residual standard error: 16850 on 4655 degrees of freedom
+    ## Multiple R-squared:  0.004685,   Adjusted R-squared:  0.003402 
+    ## F-statistic: 3.652 on 6 and 4655 DF,  p-value: 0.001279
 
 ``` r
 trCtrl <- trainControl(method = "cv", number = 10)
@@ -227,7 +210,7 @@ mlr2
     ## Linear Regression 
     ## 
     ## 4662 samples
-    ##   19 predictor
+    ##    6 predictor
     ## 
     ## No pre-processing
     ## Resampling: Cross-Validated (10 fold) 
@@ -235,7 +218,7 @@ mlr2
     ## Resampling results:
     ## 
     ##   RMSE      Rsquared     MAE     
-    ##   14238.56  0.009123393  4006.427
+    ##   14225.07  0.005721379  3951.839
     ## 
     ## Tuning parameter 'intercept' was held constant at a value of TRUE
 
