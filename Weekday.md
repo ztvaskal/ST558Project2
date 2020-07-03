@@ -14,6 +14,10 @@ Zack Vaskalis
   - [Data](#data)
   - [Summarizations](#summarizations)
   - [Modeling](#modeling)
+      - [Linear: Multiple Linear Regression
+        Model](#linear-multiple-linear-regression-model)
+      - [Non-Linear: Random Forest
+        Model](#non-linear-random-forest-model)
 
 ## Introduction
 
@@ -222,7 +226,7 @@ initial_seed <- as.integer(initial_seed)
 print (initial_seed)
 ```
 
-    ## [1] 1593804218
+    ## [1] 1593811083
 
 ``` r
 seed <- initial_seed %% 100000
@@ -324,8 +328,10 @@ well. Now we should add `log_shares` to the testing dataset and remove
 `shares` from both training and testing datasets.
 
 ``` r
+# Add log_shares to testing dataset
 testingData$log_shares <- log(testingData$shares)
 
+# Remove shares from both training and testing datasets
 trainingData <- select(trainingData, -(shares))
 testingData <- select(testingData, -(shares))
 ```
@@ -334,21 +340,26 @@ Now we are ready to proceed with the analysis.
 
 ## Modeling
 
+### Linear: Multiple Linear Regression Model
+
 First we will start with the Multiple Linear Regression (MLR) Model. For
 both analyses we will be using functions from the caret package,
 specifically the `train()` function. For an MLR Model, we simply need to
 add an option to the train() function with `method = "lm"`. We can also
 add the root mean squared error (RMSE), which we discussed above, as an
-option with the code `metric = "RMSE"`. We will also use repeated
-10-fold cross-validation (CV). The results of the MLR Model are below.
+option with the code `metric = "RMSE"`. We will also use 10-fold
+Cross-Validation (CV). The results of the MLR Model are below. First we
+run the model to fit using the training data. After we use the fitted
+model on the test set. Finally we present the results of the training
+and testing with RMSE values for each.
 
 ``` r
 # Multiple Regression Model chosen using all predictor variables to try to predict log_shares.
 # This will also allow for comparison to the random forest model, and RMSE values will be 
 # compared between the two models.
-
-trCtrl <- trainControl(method = "repeatedcv", number = 10, repeats = 5)
-fitMLR <- train(log_shares~., data=trainingData, method = "lm", metric = "RMSE", trControl = trCtrl)
+trCtrl1 <- trainControl(method = "cv", number = 10)
+fitMLR <- train(log_shares ~ ., data=trainingData, method = "lm", metric = "RMSE",
+                trControl = trCtrl1, preProcess = c("center", "scale"))
 
 #Summary of the MLR Model
 fitMLR
@@ -359,13 +370,13 @@ fitMLR
     ## 4662 samples
     ##   14 predictor
     ## 
-    ## No pre-processing
-    ## Resampling: Cross-Validated (10 fold, repeated 5 times) 
+    ## Pre-processing: centered (14), scaled (14) 
+    ## Resampling: Cross-Validated (10 fold) 
     ## Summary of sample sizes: 4195, 4197, 4196, 4195, 4196, 4196, ... 
     ## Resampling results:
     ## 
     ##   RMSE       Rsquared    MAE      
-    ##   0.9344434  0.08912805  0.6869398
+    ##   0.9343802  0.08950929  0.6864458
     ## 
     ## Tuning parameter 'intercept' was held constant at a value of TRUE
 
@@ -383,22 +394,22 @@ summary(fitMLR)
     ## -8.1598 -0.5753 -0.1923  0.3974  5.5629 
     ## 
     ## Coefficients:
-    ##                             Estimate Std. Error t value Pr(>|t|)    
-    ## (Intercept)                6.572e+00  1.081e-01  60.816  < 2e-16 ***
-    ## n_tokens_content          -3.676e-05  3.393e-05  -1.083 0.278687    
-    ## num_hrefs                  5.112e-03  1.417e-03   3.606 0.000314 ***
-    ## average_token_length      -7.442e-02  2.186e-02  -3.405 0.000668 ***
-    ## kw_avg_min                -4.886e-05  3.194e-05  -1.530 0.126172    
-    ## kw_avg_max                -8.697e-07  1.362e-07  -6.383 1.90e-10 ***
-    ## kw_min_avg                -4.245e-05  1.624e-05  -2.615 0.008960 ** 
-    ## kw_max_avg                -4.028e-05  5.085e-06  -7.922 2.91e-15 ***
-    ## kw_avg_avg                 3.819e-04  2.753e-05  13.871  < 2e-16 ***
-    ## LDA_00                     4.347e-01  5.531e-02   7.858 4.81e-15 ***
-    ## LDA_04                     3.053e-01  5.113e-02   5.971 2.53e-09 ***
-    ## global_subjectivity        6.754e-01  1.581e-01   4.273 1.97e-05 ***
-    ## global_sentiment_polarity -2.391e-01  1.527e-01  -1.566 0.117456    
-    ## title_subjectivity         9.431e-02  5.077e-02   1.858 0.063264 .  
-    ## abs_title_subjectivity     2.077e-01  8.382e-02   2.477 0.013271 *  
+    ##                           Estimate Std. Error t value Pr(>|t|)    
+    ## (Intercept)                7.44960    0.01367 544.764  < 2e-16 ***
+    ## n_tokens_content          -0.01713    0.01581  -1.083 0.278687    
+    ## num_hrefs                  0.05850    0.01622   3.606 0.000314 ***
+    ## average_token_length      -0.06151    0.01807  -3.405 0.000668 ***
+    ## kw_avg_min                -0.02475    0.01618  -1.530 0.126172    
+    ## kw_avg_max                -0.11677    0.01829  -6.383 1.90e-10 ***
+    ## kw_min_avg                -0.04763    0.01822  -2.615 0.008960 ** 
+    ## kw_max_avg                -0.21892    0.02764  -7.922 2.91e-15 ***
+    ## kw_avg_avg                 0.47195    0.03402  13.871  < 2e-16 ***
+    ## LDA_00                     0.11631    0.01480   7.858 4.81e-15 ***
+    ## LDA_04                     0.08791    0.01472   5.971 2.53e-09 ***
+    ## global_subjectivity        0.07813    0.01828   4.273 1.97e-05 ***
+    ## global_sentiment_polarity -0.02318    0.01480  -1.566 0.117456    
+    ## title_subjectivity         0.03010    0.01620   1.858 0.063264 .  
+    ## abs_title_subjectivity     0.03951    0.01595   2.477 0.013271 *  
     ## ---
     ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
     ## 
@@ -417,6 +428,7 @@ predMLR_RMSE
     ## [1] 0.8761357
 
 ``` r
+# Output the results of MLR Model
 output1 <- tribble(~model, ~trainRMSE, ~testRMSE,
                    "MLR", fitMLR_RMSE, predMLR_RMSE)
 output1
@@ -427,29 +439,104 @@ output1
     ##   <chr>     <dbl>    <dbl>
     ## 1 MLR       0.934    0.876
 
+The logic behind choosing the multiple linear regression model is that
+the shares (and equivalently the log-transformed log\_shares variable)
+is a continuous numeric variable we are trying to predict, based upon
+numerous dependent/explanatory variables. The full dataset has a total
+of 58 predictors which is extremely large. Again the goal in mind here
+to produce an accurate model with the least amount of error as possible
+when making a prediction. At the same time, and this is the issue with
+too many variables, we need to cognizant of not overfitting the model,
+which occurs when there are too many variables in play and valid
+predictions cannot be made.
+
+### Non-Linear: Random Forest Model
+
 The non-linear model chosen for this project is the random forests
 model. This model is a good fit for this dataset given the number of
 predictors included for analysis. In the model, a random subset of
 predictors is selected, which will allow for a good predictor to not
-dominate the tree fits. We will specify `mtry` to have a value of `p/3`.
+dominate the tree fits. The model is run with 10-fold Cross Validation
+(CV). The model is also specified with `ntree = 200` and `mtry =
+ncol(trainingData)/3`. The results of the Random Forest Model are below.
+First we run the model to fit using the training data. After we use the
+fitted model on the test set. Finally we present the results of the
+training and testing with RMSE values for each.
 
 ``` r
 # Non-linear model chosen is Random Forests Model  
+mtry <- ncol(trainingData)/3
 
-# Model fit with training data
-#rfFit <- randomForest(shares ~ ., data = trainingData, mtry = ncol(trainingData)/3,
-#                     importance = TRUE)
 # Fit Random Forest Tree using method = "rf" and tuning parameter, mtry
-#trCtrl <- trainControl(method = "cv", number = 3)
-#randFrst <- train(shares~., data = trainingData, method = "rf", trControl = trCtrl)
-#randFrst
+trCtrl2 <- trainControl(method = "cv", number = 10)
+fitRandFrst <- train(log_shares ~ ., data = trainingData, method = "rf", trControl = trCtrl2,
+                     preProcess = c("center", "scale"), ntree = 200, tuneGrid = expand.grid(.mtry=mtry))
 
+#Summary of the Random Forest Model
+fitRandFrst
+```
+
+    ## Random Forest 
+    ## 
+    ## 4662 samples
+    ##   14 predictor
+    ## 
+    ## Pre-processing: centered (14), scaled (14) 
+    ## Resampling: Cross-Validated (10 fold) 
+    ## Summary of sample sizes: 4197, 4196, 4196, 4195, 4196, 4196, ... 
+    ## Resampling results:
+    ## 
+    ##   RMSE      Rsquared   MAE      
+    ##   0.925965  0.1049931  0.6823375
+    ## 
+    ## Tuning parameter 'mtry' was held constant at a value of 5
+
+``` r
+fitRF_RMSE <- min(fitRandFrst$results[2])
 
 # Model predictions using testing data
-#rfPred <- predict(rfFit, newdata = dplyr::select(testingData, -shares))
+predRandFrst <- predict(fitRandFrst, newdata = dplyr::select(testingData, -log_shares))
 
 # Get the root mean squared error (RMSE) value - root of test prediction error
-
-#rfRMSE <- sqrt(mean((rfPred-testingData$shares)^2))
-#rfRMSE
+predRF_RMSE <- sqrt(mean((predRandFrst-testingData$log_shares)^2))
+predRF_RMSE
 ```
+
+    ## [1] 0.8784261
+
+``` r
+# Output the results of RF Model
+output2 <- tribble(~model, ~trainRMSE, ~testRMSE,
+                   "Random Forest", fitRF_RMSE, predRF_RMSE)
+output2
+```
+
+    ## # A tibble: 1 x 3
+    ##   model         trainRMSE testRMSE
+    ##   <chr>             <dbl>    <dbl>
+    ## 1 Random Forest     0.926    0.878
+
+The logic behind choosing random forest technique is that it has the
+capability of handling large datasets, and by its nature is a
+combination of decision trees that can be modeled for prediction, which
+again is our task here in trying to predict shares, or in our case as we
+have seen, log\_shares. Again, a main benefit of this approach is that
+the prediction is based on an average of predictions across all of the
+trees.
+
+Thus, now we can compare the two models: MLR and Random Forest. The
+resulting table below shows the training and testing results for both
+models.
+
+``` r
+outputFinal <- tribble(~model, ~trainRMSE, ~testRMSE,
+                   "MLR", fitMLR_RMSE, predMLR_RMSE,
+                   "Random Forest", fitRF_RMSE, predRF_RMSE)
+outputFinal
+```
+
+    ## # A tibble: 2 x 3
+    ##   model         trainRMSE testRMSE
+    ##   <chr>             <dbl>    <dbl>
+    ## 1 MLR               0.934    0.876
+    ## 2 Random Forest     0.926    0.878
