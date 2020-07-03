@@ -1,7 +1,7 @@
 ---
 title: "Weekday"
 author: "Zack Vaskalis"
-date: "7/2/2020"
+date: "07/03/2020"
 output: 
   rmarkdown::github_document:
     toc: TRUE
@@ -16,39 +16,30 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Introduction
 
+This project uses the Online News Popularity Data Set which can be found at the University of California Irvine [UCI Machine Learning Repository, Center for Machine Learning and Intelligent Systems](https://archive.ics.uci.edu/ml/datasets/Online+News+Popularity#). The dataset being used here was compiled by several researchers in Portugal, who collected articles from [Mashable](www.mashable.com) and compiled associated statistics for a period of two years, with the goal of being able to predict the number of shares in social networks (a measure of popularity). The dataset has over 39,000 records of information spanning the two year time period from January 07, 2013 to December 27th, 2014.  The dataset also contains 61 variables, of which 58 are predictive attributes, 2 non-predictive variables(the source url and the time between article publication and dataset acquisition), and finally the goal field for prediction: the number of shares.
+
 ### Attribute Information:
 
-Number of Attributes in Dataset for Analysis: 28 (27 predictive attributes, 1 outcome attribute)
+Out of the 61 Attributes available in this dataset for analysis, in order not to overfit the model with too many dependent variables (which could yield not enough generalization of the dataset to make predictions, especially valid ones), I have chosen to use the following 7 variables, 6 which are predictive, and 1, the shares variable, which is outcome variable.  The weekday variables are also included, but only for subsetting the data by the day of the week.  Once we have the "Monday" dataset, for instance, all of these `weekday_is_*` variables will be removed from the dataset.  The variables selected are below, and the reasoning behind their selection follows.
 
 Attribute Information:    
-1.  n_tokens_title: Number of words in the title    
-2.  n_tokens_content: Number of words in the content    
-3.  n_unique_tokens: Rate of unique words in the content    
-4.  n_non_stop_unique_tokens: Rate of unique non-stop words in the content    
-5.  weekday_is_monday: Was the article published on a Monday?    
-6.  weekday_is_tuesday: Was the article published on a Tuesday?    
-7.  weekday_is_wednesday: Was the article published on a Wednesday?    
-8.  weekday_is_thursday: Was the article published on a Thursday?    
-9.  weekday_is_friday: Was the article published on a Friday?    
-10.  weekday_is_saturday: Was the article published on a Saturday?    
-11.  weekday_is_sunday: Was the article published on a Sunday?    
-12.  global_subjectivity: Text subjectivity    
-13.  global_sentiment_polarity: Text sentiment polarity    
-14.  global_rate_positive_words: Rate of positive words in the content    
-15.  global_rate_negative_words: Rate of negative words in the content    
-16.  rate_positive_words: Rate of positive words among non-neutral tokens    
-17.  rate_negative_words: Rate of negative words among non-neutral tokens    
-18.  avg_positive_polarity: Avg. polarity of positive words    
-19.  min_positive_polarity: Min. polarity of positive words    
-20.  max_positive_polarity: Max. polarity of positive words    
-21.  avg_negative_polarity: Avg. polarity of negative words    
-22.  min_negative_polarity: Min. polarity of negative words    
-23.  max_negative_polarity: Max. polarity of negative words    
-24.  title_subjectivity: Title subjectivity    
-25.  title_sentiment_polarity: Title polarity    
-26.  abs_title_subjectivity: Absolute subjectivity level    
-27.  abs_title_sentiment_polarity: Absolute polarity level    
-28.  shares: Number of shares (target)    
+1.  n_tokens_content: Number of words in the content    
+2.  n_unique_tokens: Rate of unique words in the content    
+3.  average_token_length: Average length of the words in the content    
+4.  global_subjectivity: Text subjectivity    
+5.  rate_positive_words: Rate of positive words among non-neutral tokens    
+6.  avg_positive_polarity: Avg. polarity of positive words    
+7.  shares: Number of shares (target outcome trying to predict)    
+8.  weekday_is_variables: Was the article published on a _______?    
+
+*  weekday_is_monday: Was the article published on a Monday?    
+*  weekday_is_tuesday: Was the article published on a Tuesday?    
+*  weekday_is_wednesday: Was the article published on a Wednesday?    
+*  weekday_is_thursday: Was the article published on a Thursday?    
+*  weekday_is_friday: Was the article published on a Friday?    
+*  weekday_is_saturday: Was the article published on a Saturday?    
+*  weekday_is_sunday: Was the article published on a Sunday?    
+
 
 
 
@@ -78,7 +69,7 @@ path <- "C:/Users/Zachary Vaskalis/Dropbox/ST558/ST558Project2/ST558Project2/Onl
 weekdayDataRAW <- read_csv(path)
 
 # Select only variables I am choosing to use for the analysis.
-weekdayData1 <- select(weekdayDataRAW,n_tokens_title, n_tokens_content, n_unique_tokens,
+weekdayData1 <- select(weekdayDataRAW, n_tokens_content, n_unique_tokens,
                        n_non_stop_unique_tokens, weekday_is_monday, weekday_is_tuesday,
                        weekday_is_wednesday, weekday_is_thursday, weekday_is_friday,
                        weekday_is_saturday, weekday_is_sunday, global_subjectivity,
@@ -107,7 +98,7 @@ initial_seed <- Sys.time()
 initial_seed <- as.integer(initial_seed)
 print (initial_seed)
 seed <- initial_seed %% 100000
-print(seed)
+#print(seed)
 
 # -----------------RUN FROM HERE NOW THAT YOU HAVE RANDOM SEED-------------------------
 # For reproducability, set seed using outcome of above process:
@@ -141,13 +132,17 @@ x[,4:10] <- round(x[,4:10],4)
 y <- select(x,1,3,4,5,6,8,9,10)
 datatable(arrange(y,desc(variable)))
 
-histogram(trainingData$n_tokens_content)
-plot(trainingData$n_tokens_content,trainingData$shares)
+#histogram(trainingData$n_tokens_content)
+#plot(trainingData$n_tokens_content,trainingData$shares)
+#plot(trainingData$n_tokens_title,trainingData$shares)
+#plot(trainingData$n_unique_tokens,trainingData$shares)
+#plot(trainingData$global_subjectivity,trainingData$shares)
 
-trainingData$n_tokens_content <- log(trainingData$n_tokens_content + 1)
-trainingData$shares <- log(trainingData$shares + 1)
 
-trainingData <- filter(trainingData, n_tokens_content > 0)
+#trainingData$n_tokens_content <- log(trainingData$n_tokens_content + 1)
+#trainingData$shares <- log(trainingData$shares + 1)
+
+#trainingData <- filter(trainingData, n_tokens_content > 0)
 
 ```
 
@@ -174,21 +169,21 @@ The non-linear model chosen for this project is the random forests model.  This 
 # Non-linear model chosen is Random Forests Model  
 
 # Model fit with training data
-rfFit <- randomForest(shares ~ ., data = trainingData, mtry = ncol(trainingData)/3,
-                     importance = TRUE)
+#rfFit <- randomForest(shares ~ ., data = trainingData, mtry = ncol(trainingData)/3,
+#                     importance = TRUE)
 # Fit Random Forest Tree using method = "rf" and tuning parameter, mtry
-trCtrl <- trainControl(method = "cv", number = 3)
-randFrst <- train(shares~., data = trainingData, method = "rf", trControl = trCtrl)
-randFrst
+#trCtrl <- trainControl(method = "cv", number = 3)
+#randFrst <- train(shares~., data = trainingData, method = "rf", trControl = trCtrl)
+#randFrst
 
 
 # Model predictions using testing data
-rfPred <- predict(rfFit, newdata = dplyr::select(testingData, -shares))
+#rfPred <- predict(rfFit, newdata = dplyr::select(testingData, -shares))
 
 # Get the root mean squared error (RMSE) value - root of test prediction error
 
-rfRMSE <- sqrt(mean((rfPred-testingData$shares)^2))
-rfRMSE
+#rfRMSE <- sqrt(mean((rfPred-testingData$shares)^2))
+#rfRMSE
 
 ```
 
