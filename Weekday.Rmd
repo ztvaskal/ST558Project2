@@ -64,6 +64,7 @@ library(haven)
 library(rgl)
 library(knitr)
 library(tree)
+library(randomForest)
 library(psych)
 library(DT)
 library(summarytools)
@@ -99,6 +100,7 @@ weekdayData3 <- select(weekdayData2, -(weekday_is_monday:weekday_is_sunday))
 
 ```
 
+
 ```{r createTrainTestSets, echo=TRUE, message=FALSE, warning=FALSE}
 # Get random number from the computer clock using Sys.time()
 initial_seed <- Sys.time()
@@ -107,8 +109,9 @@ print (initial_seed)
 seed <- initial_seed %% 100000
 print(seed)
 
+# -----------------RUN FROM HERE NOW THAT YOU HAVE RANDOM SEED-------------------------
 # For reproducability, set seed using outcome of above process:
-set.seed(30135)
+set.seed(42131)
 
 # Get random sample of row numbers from large dataset to split data into train and test:
 # 70% of data for training
@@ -131,21 +134,63 @@ The summaries below are related to the training dataset.  The table that appears
 # Summary statistics for all variables in the training dataset using the
 # describeBy() function from the psych package
 summaryData <- psych::describeBy(trainingData, trainingData$type)
-#x <- kable(summaryData)
-#kableExtra::column_spec(x, c(1,2,3), width = "10em", bold = TRUE, italic = TRUE, width_min = TRUE)
 
+x <- tibble(row.names(summaryData), summaryData) 
+colnames(x)[1] <- "variable"
+x[,4:10] <- round(x[,4:10],4)
+y <- select(x,1,3,4,5,6,8,9,10)
+datatable(arrange(y,desc(variable)))
 
-y <- tibble(row.names(summaryData), summaryData)  #summaryData$n, summaryData$mean, summaryData$sd)
-colnames(y)[1] <- "variable"
-datatable(select(y,1,3,4,5,6,8,9,10))
-#mydata <- summarytools::descr(trainingData)
-#datatable(mydata)
+histogram(trainingData$n_tokens_content)
+plot(trainingData$n_tokens_content,trainingData$shares)
+
+trainingData$n_tokens_content <- log(trainingData$n_tokens_content + 1)
+trainingData$shares <- log(trainingData$shares + 1)
+
+trainingData <- filter(trainingData, n_tokens_content > 0)
 
 ```
 
 ## Modeling
 
+```{r linearModel, echo=TRUE, message=FALSE, warning=FALSE}
+# Multiple Regression Model chosen using all 20 predictor variables to try to predict
+# shares.  This will also allow for comparison to the random forest model, and RMSE 
+# values will be compared between the two models.
 
+mlr1 <- lm(shares ~ ., data = trainingData)
+summary(mlr1)
+
+trCtrl <- trainControl(method = "cv", number = 10)
+mlr2 <- train(shares~., data=trainingData, method="lm",metric = "RMSE", trControl=trCtrl)
+mlr2
+
+
+```
+
+The non-linear model chosen for this project is the random forests model.  This model is a good fit for this dataset given the number of predictors included for analysis.  In the model, a random subset of predictors is selected, which will allow for a good predictor to not dominate the tree fits.  We will specify `mtry` to have a value of `p/3`.
+
+```{r nonLinearModel, echo=TRUE, message=FALSE, warning=FALSE}
+# Non-linear model chosen is Random Forests Model  
+
+# Model fit with training data
+rfFit <- randomForest(shares ~ ., data = trainingData, mtry = ncol(trainingData)/3,
+                     importance = TRUE)
+# Fit Random Forest Tree using method = "rf" and tuning parameter, mtry
+trCtrl <- trainControl(method = "cv", number = 3)
+randFrst <- train(shares~., data = trainingData, method = "rf", trControl = trCtrl)
+randFrst
+
+
+# Model predictions using testing data
+rfPred <- predict(rfFit, newdata = dplyr::select(testingData, -shares))
+
+# Get the root mean squared error (RMSE) value - root of test prediction error
+
+rfRMSE <- sqrt(mean((rfPred-testingData$shares)^2))
+rfRMSE
+
+```
 
 
 
