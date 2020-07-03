@@ -33,34 +33,59 @@ Out of the 61 Attributes available in this dataset for analysis, in
 order not to overfit the model with too many dependent variables (which
 could yield not enough generalization of the dataset to make
 predictions, especially valid ones), I have chosen to use the following
-7 variables, 6 which are predictive, and 1, the shares variable, which
-is outcome variable. The weekday variables are also included, but only
-for subsetting the data by the day of the week. Once we have the
-“Monday” dataset, for instance, all of these `weekday_is_*`
+14 predictor variables and of course the 1 outcome variable we are
+trying to predict, `shares`. The weekday variables are also included,
+but only for subsetting the data by the day of the week. Once we have
+the “Monday” dataset, for instance, all of these `weekday_is_*`
 variables will be removed from the dataset. The variables selected are
 below, and the reasoning behind their selection follows.
 
 Attribute Information:  
-1\. n\_tokens\_content: Number of words in the content  
-2\. n\_unique\_tokens: Rate of unique words in the content  
-3\. average\_token\_length: Average length of the words in the content  
-4\. global\_subjectivity: Text subjectivity  
-5\. rate\_positive\_words: Rate of positive words among non-neutral
-tokens  
-6\. avg\_positive\_polarity: Avg. polarity of positive words  
-7\. shares: Number of shares (target outcome trying to predict)  
-8\. weekday\_is\_variables: Was the article published on a
+1\. `n_tokens_content`: Number of words in the content  
+2\. `num_hrefs`: Number of links  
+3\. `average_token_length`: Average length of the words in the content  
+4\. `kw_avg_min`: Worst keyword (avg. shares)  
+5\. `kw_avg_max`: Best keyword (avg. shares)  
+6\. `kw_min_avg`: Avg. keyword (min. shares)  
+7\. `kw_max_avg`: Avg. keyword (max. shares)  
+8\. `kw_avg_avg`: Avg. keyword (avg. shares)  
+9\. `LDA_00`: Closeness to LDA topic 0  
+10\. `LDA_04`: Closeness to LDA topic 4  
+11\. `global_subjectivity`: Text subjectivity  
+12\. `global_sentiment_polarity`: Text sentiment polarity  
+13\. `title_subjectivity`: Title subjectivity  
+14\. `abs_title_subjectivity`: Absolute subjectivity level  
+15\. `shares`: Number of shares (target outcome trying to predict)  
+16\. `weekday_is_variables`: Was the article published on a
 \_\_\_\_\_\_\_?
 
-  - weekday\_is\_monday: Was the article published on a Monday?  
-  - weekday\_is\_tuesday: Was the article published on a Tuesday?  
-  - weekday\_is\_wednesday: Was the article published on a Wednesday?  
-  - weekday\_is\_thursday: Was the article published on a Thursday?  
-  - weekday\_is\_friday: Was the article published on a Friday?  
-  - weekday\_is\_saturday: Was the article published on a Saturday?  
-  - weekday\_is\_sunday: Was the article published on a Sunday?
+  - `weekday_is_monday`: Was the article published on a Monday?  
+  - `weekday_is_tuesday`: Was the article published on a Tuesday?  
+  - `weekday_is_wednesday`: Was the article published on a Wednesday?  
+  - `weekday_is_thursday`: Was the article published on a Thursday?  
+  - `weekday_is_friday`: Was the article published on a Friday?  
+  - `weekday_is_saturday`: Was the article published on a Saturday?  
+  - `weekday_is_sunday`: Was the article published on a Sunday?
 
-<!-- end list -->
+For this dataset of nearly 60 predictor variables, a dataset for
+analysis that contains approximately 25% of them seems to feel right,
+since too many predictor variables can cause overfitting. This subset of
+variables is a sampling across the set of variables I thought might have
+an impact. For example, the number of words of content
+(`n_tokens_content`), and the number of links (`num_hrefs`) seemed
+reasonable that they might play a role in predicting shares. The `kw_`
+variables also seem like they should be good predictors. I chose the
+first and last `LDA` variables. The global ratings also seemed like they
+would have an impact on predicting the shares so I chose
+`global_subjectivity` and `global_sentiment_polarity`. Then finally, to
+round out the dataset of predictors I chose the title subjectivity and
+absolutely subjectivity level, since often a title will have the largest
+impact - catchy or provoking titles are clickbait for a reason\!
+
+## Data
+
+Now on to the data\! First we will load in all of the necessary packages
+from R.
 
 ``` r
 #load necessary libraries
@@ -80,7 +105,9 @@ library(DT)
 library(summarytools)
 ```
 
-## Data
+Next we will read in the entire dataset. Then we will use the `select()`
+function from the `dplyr` package to select only the variables mentioned
+above for the analysis.
 
 ``` r
 # Read-in entire dataset
@@ -88,11 +115,15 @@ path <- "C:/Users/Zachary Vaskalis/Dropbox/ST558/OnlineNewsPopularity.csv"
 weekdayDataRAW <- read_csv(path)
 
 # Select only variables I am choosing to use for the analysis.
-weekdayData1 <- select(weekdayDataRAW, n_tokens_content, n_unique_tokens,
-                       average_token_length, weekday_is_monday, weekday_is_tuesday,
+weekdayData1 <- select(weekdayDataRAW, n_tokens_content, num_hrefs,
+                       average_token_length, kw_avg_min, kw_avg_max,
+                       kw_min_avg ,kw_max_avg, kw_avg_avg,
+                       LDA_00, LDA_04,global_subjectivity,
+                       global_sentiment_polarity, title_subjectivity,
+                       abs_title_subjectivity, shares,
+                       weekday_is_monday, weekday_is_tuesday,
                        weekday_is_wednesday, weekday_is_thursday, weekday_is_friday,
-                       weekday_is_saturday, weekday_is_sunday, global_subjectivity,
-                       rate_positive_words, avg_positive_polarity, shares)
+                       weekday_is_saturday, weekday_is_sunday,)
 
 # Select only the specific day of the week I am interested in.
 weekdayData2 <- filter(weekdayData1, weekday_is_monday == 1)
@@ -111,7 +142,7 @@ initial_seed <- as.integer(initial_seed)
 print (initial_seed)
 ```
 
-    ## [1] 1593785388
+    ## [1] 1593791903
 
 ``` r
 seed <- initial_seed %% 100000
@@ -183,23 +214,31 @@ summary(mlr1)
     ## 
     ## Residuals:
     ##    Min     1Q Median     3Q    Max 
-    ##  -8224  -3031  -2053   -556 686348 
+    ## -26289  -2966  -1540      8 680009 
     ## 
     ## Coefficients:
-    ##                         Estimate Std. Error t value Pr(>|t|)    
-    ## (Intercept)            4778.3406  1406.5477   3.397 0.000686 ***
-    ## n_tokens_content          0.3399     0.7685   0.442 0.658245    
-    ## n_unique_tokens        3762.6855  3483.3409   1.080 0.280112    
-    ## average_token_length  -1612.1299   545.6755  -2.954 0.003149 ** 
-    ## global_subjectivity   10182.0603  2983.9765   3.412 0.000650 ***
-    ## rate_positive_words   -1473.9988  1597.8123  -0.923 0.356310    
-    ## avg_positive_polarity  1892.9030  3094.9280   0.612 0.540823    
+    ##                             Estimate Std. Error t value Pr(>|t|)    
+    ## (Intercept)               -2.512e+03  1.937e+03  -1.297  0.19477    
+    ## n_tokens_content          -2.390e-01  6.081e-01  -0.393  0.69433    
+    ## num_hrefs                  1.540e+01  2.541e+01   0.606  0.54458    
+    ## average_token_length      -7.792e+02  3.918e+02  -1.989  0.04679 *  
+    ## kw_avg_min                 1.026e+00  5.726e-01   1.791  0.07331 .  
+    ## kw_avg_max                -2.993e-03  2.442e-03  -1.226  0.22040    
+    ## kw_min_avg                -3.824e-01  2.910e-01  -1.314  0.18892    
+    ## kw_max_avg                -2.770e-01  9.114e-02  -3.040  0.00238 ** 
+    ## kw_avg_avg                 2.618e+00  4.935e-01   5.305 1.18e-07 ***
+    ## LDA_00                     2.359e+03  9.914e+02   2.379  0.01739 *  
+    ## LDA_04                    -9.756e+01  9.165e+02  -0.106  0.91523    
+    ## global_subjectivity        8.965e+03  2.833e+03   3.164  0.00156 ** 
+    ## global_sentiment_polarity -4.809e+03  2.737e+03  -1.757  0.07900 .  
+    ## title_subjectivity        -2.429e+02  9.099e+02  -0.267  0.78952    
+    ## abs_title_subjectivity     1.319e+03  1.502e+03   0.878  0.37997    
     ## ---
     ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
     ## 
-    ## Residual standard error: 16850 on 4655 degrees of freedom
-    ## Multiple R-squared:  0.004685,   Adjusted R-squared:  0.003402 
-    ## F-statistic: 3.652 on 6 and 4655 DF,  p-value: 0.001279
+    ## Residual standard error: 16740 on 4647 degrees of freedom
+    ## Multiple R-squared:  0.02022,    Adjusted R-squared:  0.01727 
+    ## F-statistic:  6.85 on 14 and 4647 DF,  p-value: 4.19e-14
 
 ``` r
 trCtrl <- trainControl(method = "cv", number = 10)
@@ -210,15 +249,15 @@ mlr2
     ## Linear Regression 
     ## 
     ## 4662 samples
-    ##    6 predictor
+    ##   14 predictor
     ## 
     ## No pre-processing
     ## Resampling: Cross-Validated (10 fold) 
     ## Summary of sample sizes: 4195, 4196, 4195, 4197, 4195, 4196, ... 
     ## Resampling results:
     ## 
-    ##   RMSE      Rsquared     MAE     
-    ##   14225.07  0.005721379  3951.839
+    ##   RMSE      Rsquared    MAE     
+    ##   14206.79  0.02379214  3972.618
     ## 
     ## Tuning parameter 'intercept' was held constant at a value of TRUE
 

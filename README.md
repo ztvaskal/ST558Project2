@@ -7,8 +7,7 @@ Zack Vaskalis
   - [Project Objectives](#project-objectives)
   - [Data](#data)
       - [Information on Attributes for
-        Analysis](#information-on-attributes-for-analysis)
-  - [Goal of Project](#goal-of-project)
+        Analysis:](#information-on-attributes-for-analysis)
   - [Reports](#reports)
 
 ## Introduction
@@ -35,32 +34,61 @@ are predictive attributes, 2 non-predictive variables(the source url and
 the time between article publication and dataset acquisition), and
 finally the goal field for prediction: the number of shares.
 
-### Information on Attributes for Analysis
+### Information on Attributes for Analysis:
 
 Out of the 61 Attributes available in this dataset for analysis, in
 order not to overfit the model with too many dependent variables (which
 could yield not enough generalization of the dataset to make
 predictions, especially valid ones), I have chosen to use the following
-7 variables, 6 which are predictive, and 1, the shares variable, which
-is outcome variable. The weekday variables are also included, but only
-for subsetting the data by the day of the week. Once we have the
-“Monday” dataset, for instance, all of these `weekday_is_*`
+14 predictor variables and of course the 1 outcome variable we are
+trying to predict, `shares`. The weekday variables are also included,
+but only for subsetting the data by the day of the week. Once we have
+the “Monday” dataset, for instance, all of these `weekday_is_*`
 variables will be removed from the dataset. The variables selected are
-below.
+below, and the reasoning behind their selection follows.
 
 Attribute Information:  
-1\. n\_tokens\_content: Number of words in the content  
-2\. n\_unique\_tokens: Rate of unique words in the content  
-3\. average\_token\_length: Average length of the words in the content  
-4\. global\_subjectivity: Text subjectivity  
-5\. rate\_positive\_words: Rate of positive words among non-neutral
-tokens  
-6\. avg\_positive\_polarity: Avg. polarity of positive words  
-7\. shares: Number of shares (target outcome trying to predict)  
-8\. weekday\_is\_variables: Was the article published on a
+1\. `n_tokens_content`: Number of words in the content  
+2\. `num_hrefs`: Number of links  
+3\. `average_token_length`: Average length of the words in the content  
+4\. `kw_avg_min`: Worst keyword (avg. shares)  
+5\. `kw_avg_max`: Best keyword (avg. shares)  
+6\. `kw_min_avg`: Avg. keyword (min. shares)  
+7\. `kw_max_avg`: Avg. keyword (max. shares)  
+8\. `kw_avg_avg`: Avg. keyword (avg. shares)  
+9\. `LDA_00`: Closeness to LDA topic 0  
+10\. `LDA_04`: Closeness to LDA topic 4  
+11\. `global_subjectivity`: Text subjectivity  
+12\. `global_sentiment_polarity`: Text sentiment polarity  
+13\. `title_subjectivity`: Title subjectivity  
+14\. `abs_title_subjectivity`: Absolute subjectivity level  
+15\. `shares`: Number of shares (target outcome trying to predict)  
+16\. `weekday_is_variables`: Was the article published on a
 \_\_\_\_\_\_\_?
 
-## Goal of Project
+  - `weekday_is_monday`: Was the article published on a Monday?  
+  - `weekday_is_tuesday`: Was the article published on a Tuesday?  
+  - `weekday_is_wednesday`: Was the article published on a Wednesday?  
+  - `weekday_is_thursday`: Was the article published on a Thursday?  
+  - `weekday_is_friday`: Was the article published on a Friday?  
+  - `weekday_is_saturday`: Was the article published on a Saturday?  
+  - `weekday_is_sunday`: Was the article published on a Sunday?
+
+For this dataset of nearly 60 predictor variables, a dataset for
+analysis that contains approximately 25% of them seems to feel right,
+since too many predictor variables can cause overfitting. This subset of
+variables is a sampling across the set of variables I thought might have
+an impact. For example, the number of words of content
+(`n_tokens_content`), and the number of links (`num_hrefs`) seemed
+reasonable that they might play a role in predicting shares. The `kw_`
+variables also seem like they should be good predictors. I chose the
+first and last `LDA` variables. The global ratings also seemed like they
+would have an impact on predicting the shares so I chose
+`global_subjectivity` and `global_sentiment_polarity`. Then finally, to
+round out the dataset of predictors I chose the title subjectivity and
+absolutely subjectivity level, since often a title will have the largest
+impact - catchy or provoking titles are clickbait for a reason\! \#\#
+Goal of Project
 
 The goal of this project is to create 2 models (one linear and one
 non-linear) for predicting the shares variable. In addition to this
