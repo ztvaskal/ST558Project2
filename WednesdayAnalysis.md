@@ -22,7 +22,7 @@ Zack Vaskalis
 
 ## Weekday Analysis for:
 
-    ## [1] "Monday"
+    ## [1] "Wednesday"
 
 ## Introduction
 
@@ -246,7 +246,7 @@ initial_seed <- as.integer(initial_seed)
 print (initial_seed)
 ```
 
-    ## [1] 1593823298
+    ## [1] 1593823444
 
 ``` r
 seed <- initial_seed %% 100000
@@ -290,7 +290,7 @@ displayTable <- datatable(arrange(displaySummary2, desc(variable)))
 displayTable
 ```
 
-![](MondayAnalysis_files/figure-gfm/summaryStatTable-1.png)<!-- -->
+![](WednesdayAnalysis_files/figure-gfm/summaryStatTable-1.png)<!-- -->
 
 So we saw how extreme the range is for the shares variable we are trying
 to predict. Next we should probably investigate the distribution of
@@ -307,7 +307,7 @@ logarithmic transformation. The standard log in R for transformations is
 histogram(trainingData$shares)
 ```
 
-![](MondayAnalysis_files/figure-gfm/summaryStatPlot1-1.png)<!-- -->
+![](WednesdayAnalysis_files/figure-gfm/summaryStatPlot1-1.png)<!-- -->
 
 Now we can simply take the `log(shares)` and add it to the training
 dataset using a new variable called `log_shares`. To make sure the log
@@ -323,25 +323,25 @@ trainingData$log_shares <- log(trainingData$shares)
 hist_boxplot(trainingData$log_shares, col = "lightblue", freq = FALSE, density = TRUE)
 ```
 
-![](MondayAnalysis_files/figure-gfm/summaryStatPlot2-1.png)<!-- -->
+![](WednesdayAnalysis_files/figure-gfm/summaryStatPlot2-1.png)<!-- -->
 
 ``` r
 min(trainingData$log_shares)
 ```
 
-    ## [1] 0
+    ## [1] 3.583519
 
 ``` r
 max(trainingData$log_shares)
 ```
 
-    ## [1] 13.44503
+    ## [1] 13.64508
 
 ``` r
 skew(trainingData$log_shares)
 ```
 
-    ## [1] 1.067321
+    ## [1] 1.139037
 
 So hopefully by now it is apparent that the transformation worked quite
 well. Now we should add `log_shares` to the testing dataset and remove
@@ -387,16 +387,16 @@ fitMLR
 
     ## Linear Regression 
     ## 
-    ## 4662 samples
+    ## 5204 samples
     ##   14 predictor
     ## 
     ## Pre-processing: centered (14), scaled (14) 
     ## Resampling: Cross-Validated (10 fold) 
-    ## Summary of sample sizes: 4196, 4196, 4195, 4196, 4195, 4196, ... 
+    ## Summary of sample sizes: 4685, 4684, 4683, 4683, 4683, 4685, ... 
     ## Resampling results:
     ## 
     ##   RMSE       Rsquared    MAE      
-    ##   0.9348407  0.08841404  0.6871841
+    ##   0.8773887  0.09832523  0.6514733
     ## 
     ## Tuning parameter 'intercept' was held constant at
     ##  a value of TRUE
@@ -412,48 +412,48 @@ summary(fitMLR)
     ## 
     ## Residuals:
     ##     Min      1Q  Median      3Q     Max 
-    ## -8.1598 -0.5753 -0.1923  0.3974  5.5629 
+    ## -4.0250 -0.5578 -0.1726  0.3915  6.0410 
     ## 
     ## Coefficients:
-    ##                           Estimate Std. Error t value
-    ## (Intercept)                7.44960    0.01367 544.764
-    ## n_tokens_content          -0.01713    0.01581  -1.083
-    ## num_hrefs                  0.05850    0.01622   3.606
-    ## average_token_length      -0.06151    0.01807  -3.405
-    ## kw_avg_min                -0.02475    0.01618  -1.530
-    ## kw_avg_max                -0.11677    0.01829  -6.383
-    ## kw_min_avg                -0.04763    0.01822  -2.615
-    ## kw_max_avg                -0.21892    0.02764  -7.922
-    ## kw_avg_avg                 0.47195    0.03402  13.871
-    ## LDA_00                     0.11631    0.01480   7.858
-    ## LDA_04                     0.08791    0.01472   5.971
-    ## global_subjectivity        0.07813    0.01828   4.273
-    ## global_sentiment_polarity -0.02318    0.01480  -1.566
-    ## title_subjectivity         0.03010    0.01620   1.858
-    ## abs_title_subjectivity     0.03951    0.01595   2.477
+    ##                            Estimate Std. Error t value
+    ## (Intercept)                7.398227   0.012157 608.556
+    ## n_tokens_content           0.054619   0.013645   4.003
+    ## num_hrefs                  0.050523   0.014098   3.584
+    ## average_token_length      -0.051220   0.016810  -3.047
+    ## kw_avg_min                -0.003499   0.014393  -0.243
+    ## kw_avg_max                -0.075638   0.015713  -4.814
+    ## kw_min_avg                -0.067865   0.016564  -4.097
+    ## kw_max_avg                -0.251676   0.026050  -9.661
+    ## kw_avg_avg                 0.479851   0.030995  15.482
+    ## LDA_00                     0.072687   0.013118   5.541
+    ## LDA_04                     0.103560   0.013247   7.818
+    ## global_subjectivity        0.043064   0.017063   2.524
+    ## global_sentiment_polarity  0.019171   0.013363   1.435
+    ## title_subjectivity         0.034659   0.014331   2.419
+    ## abs_title_subjectivity     0.027609   0.014110   1.957
     ##                           Pr(>|t|)    
     ## (Intercept)                < 2e-16 ***
-    ## n_tokens_content          0.278687    
-    ## num_hrefs                 0.000314 ***
-    ## average_token_length      0.000668 ***
-    ## kw_avg_min                0.126172    
-    ## kw_avg_max                1.90e-10 ***
-    ## kw_min_avg                0.008960 ** 
-    ## kw_max_avg                2.91e-15 ***
+    ## n_tokens_content          6.34e-05 ***
+    ## num_hrefs                 0.000342 ***
+    ## average_token_length      0.002323 ** 
+    ## kw_avg_min                0.807950    
+    ## kw_avg_max                1.52e-06 ***
+    ## kw_min_avg                4.25e-05 ***
+    ## kw_max_avg                 < 2e-16 ***
     ## kw_avg_avg                 < 2e-16 ***
-    ## LDA_00                    4.81e-15 ***
-    ## LDA_04                    2.53e-09 ***
-    ## global_subjectivity       1.97e-05 ***
-    ## global_sentiment_polarity 0.117456    
-    ## title_subjectivity        0.063264 .  
-    ## abs_title_subjectivity    0.013271 *  
+    ## LDA_00                    3.15e-08 ***
+    ## LDA_04                    6.46e-15 ***
+    ## global_subjectivity       0.011639 *  
+    ## global_sentiment_polarity 0.151436    
+    ## title_subjectivity        0.015618 *  
+    ## abs_title_subjectivity    0.050428 .  
     ## ---
     ## Signif. codes:  
     ## 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
     ## 
-    ## Residual standard error: 0.9337 on 4647 degrees of freedom
-    ## Multiple R-squared:  0.09126,    Adjusted R-squared:  0.08852 
-    ## F-statistic: 33.33 on 14 and 4647 DF,  p-value: < 2.2e-16
+    ## Residual standard error: 0.877 on 5189 degrees of freedom
+    ## Multiple R-squared:  0.1013, Adjusted R-squared:  0.09887 
+    ## F-statistic: 41.78 on 14 and 5189 DF,  p-value: < 2.2e-16
 
 ``` r
 # Now use MLR Model from training data to make predictions using testing data
@@ -463,7 +463,7 @@ predMLR_RMSE <- sqrt(mean((predMLR-testingData$log_shares)^2))
 predMLR_RMSE
 ```
 
-    ## [1] 0.8761357
+    ## [1] 0.8995207
 
 ``` r
 # Output the results of MLR Model
@@ -475,7 +475,7 @@ output1
     ## # A tibble: 1 x 3
     ##   model trainRMSE testRMSE
     ##   <chr>     <dbl>    <dbl>
-    ## 1 MLR       0.935    0.876
+    ## 1 MLR       0.877    0.900
 
 The logic behind choosing the multiple linear regression model is that
 the shares (and equivalently the log-transformed log\_shares variable)
@@ -517,16 +517,16 @@ fitRandFrst
 
     ## Random Forest 
     ## 
-    ## 4662 samples
+    ## 5204 samples
     ##   14 predictor
     ## 
     ## Pre-processing: centered (14), scaled (14) 
     ## Resampling: Cross-Validated (10 fold) 
-    ## Summary of sample sizes: 4195, 4196, 4195, 4196, 4196, 4196, ... 
+    ## Summary of sample sizes: 4684, 4683, 4684, 4684, 4682, 4684, ... 
     ## Resampling results:
     ## 
-    ##   RMSE       Rsquared   MAE      
-    ##   0.9280543  0.1046695  0.6845453
+    ##   RMSE      Rsquared   MAE      
+    ##   0.876099  0.1044198  0.6525046
     ## 
     ## Tuning parameter 'mtry' was held constant at a
     ##  value of 5
@@ -542,7 +542,7 @@ predRF_RMSE <- sqrt(mean((predRandFrst - testingData$log_shares)^2))
 predRF_RMSE
 ```
 
-    ## [1] 0.8803342
+    ## [1] 0.8978106
 
 ``` r
 # Output the results of RF Model
@@ -554,7 +554,7 @@ output2
     ## # A tibble: 1 x 3
     ##   model         trainRMSE testRMSE
     ##   <chr>             <dbl>    <dbl>
-    ## 1 Random Forest     0.928    0.880
+    ## 1 Random Forest     0.876    0.898
 
 The logic behind choosing random forest technique is that it has the
 capability of handling large datasets, and by its nature is a
@@ -578,5 +578,5 @@ outputFinal
     ## # A tibble: 2 x 3
     ##   model         trainRMSE testRMSE
     ##   <chr>             <dbl>    <dbl>
-    ## 1 MLR               0.935    0.876
-    ## 2 Random Forest     0.928    0.880
+    ## 1 MLR               0.877    0.900
+    ## 2 Random Forest     0.876    0.898

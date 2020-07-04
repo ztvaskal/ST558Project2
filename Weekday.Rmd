@@ -16,8 +16,22 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Weekday Analysis for:
 
-```{r paramsValue, echo=TRUE}
-substring(params$dayVar, first = 12)
+```{r paramsValue, echo=FALSE}
+if (params$dayVar == "weekday_is_monday"){
+  print("Monday")
+} else if (params$dayVar == "weekday_is_tuesday"){
+  print("Tuesday")
+} else if (params$dayVar == "weekday_is_wednesday"){
+  print("Wednesday")
+} else if (params$dayVar == "weekday_is_thursday"){
+  print("Thursday")
+} else if (params$dayVar == "weekday_is_friday"){
+  print("Friday")
+} else if (params$dayVar == "weekday_is_saturday"){
+  print("Saturday")
+} else if (params$dayVar == "weekday_is_sunday"){
+  print("Sunday")
+}
 ```
 
 ## Introduction
@@ -114,14 +128,22 @@ weekdayData1 <- select(weekdayDataRAW, n_tokens_content, num_hrefs,
                        weekday_is_wednesday, weekday_is_thursday, weekday_is_friday,
                        weekday_is_saturday, weekday_is_sunday)
 
-
-
-# Select only the specific day of the week I am interested in.
-# weekdayData2 <- filter(weekdayData1, weekday_is_monday == 1)
-if (colnames(weekdayData1[16]) == params$dayVar){
+# Select only the specific day of the week I am interested in from the passed parameter.
+if (params$dayVar == "weekday_is_monday"){
   weekdayData2 <- filter(weekdayData1, weekday_is_monday == 1)
+} else if (params$dayVar == "weekday_is_tuesday"){
+  weekdayData2 <- filter(weekdayData1, weekday_is_tuesday == 1)
+} else if (params$dayVar == "weekday_is_wednesday"){
+  weekdayData2 <- filter(weekdayData1, weekday_is_wednesday == 1)
+} else if (params$dayVar == "weekday_is_thursday"){
+  weekdayData2 <- filter(weekdayData1, weekday_is_thursday == 1)
+} else if (params$dayVar == "weekday_is_friday"){
+  weekdayData2 <- filter(weekdayData1, weekday_is_friday == 1)
+} else if (params$dayVar == "weekday_is_saturday"){
+  weekdayData2 <- filter(weekdayData1, weekday_is_saturday == 1)
+} else if (params$dayVar == "weekday_is_sunday"){
+  weekdayData2 <- filter(weekdayData1, weekday_is_sunday == 1)
 }
-
 
 # Now we know we only have the day of the week filtered by above.
 # So, we can remove all of the weekday_is_* variables now as they are no longer needed.
